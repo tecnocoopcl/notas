@@ -267,26 +267,28 @@ code { font-family: var(--esp-mono); font-size: 0.9em; }
 .grafo-local { flex: 1; min-height: 260px; display: flex; flex-direction: column; }
 .grafo-local .grafo { flex: 1; border: 1px solid var(--esp-border); border-radius: var(--esp-radius); }
 
-/* Lectura */
-.vista { flex: 1; overflow: auto; }
-.markdown { max-width: 760px; margin: 0 auto; padding: 28px 32px 80px; line-height: 1.7; font-size: 16px; }
-.markdown h1, .markdown h2, .markdown h3 { line-height: 1.25; margin: 1.4em 0 0.5em; }
-.markdown h1 { font-size: 1.9em; margin-top: 0.2em; }
-.markdown h2 { font-size: 1.45em; }
-.markdown h3 { font-size: 1.2em; }
-.markdown pre {
-  padding: 12px 14px;
-  border-radius: 8px;
-  background: var(--esp-bg-sunken);
-  overflow: auto;
-}
-.markdown :not(pre) > code { padding: 1px 5px; border-radius: 4px; background: var(--esp-bg-sunken); }
-.markdown blockquote { margin: 1em 0; padding-left: 14px; border-left: 3px solid var(--esp-border); color: var(--esp-text-muted); }
-.markdown table { border-collapse: collapse; }
-.markdown th, .markdown td { padding: 6px 10px; border: 1px solid var(--esp-border); }
-.markdown img { max-width: 100%; }
-.markdown hr { border: 0; border-top: 1px solid var(--esp-border); }
-.wikilink { text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--esp-accent) 40%, transparent); }
+/* Lectura: vista previa en vivo sobre el editor (vivo.js) */
+.cm-vivo .cm-line { line-height: 1.7; }
+.cm-vivo .cm-vivo-h1, .cm-vivo .cm-vivo-h2, .cm-vivo .cm-vivo-h3,
+.cm-vivo .cm-vivo-h4, .cm-vivo .cm-vivo-h5, .cm-vivo .cm-vivo-h6 { font-weight: 700; line-height: 1.3; }
+.cm-vivo [class*="cm-vivo-h"] span { text-decoration: none; }
+.cm-vivo .cm-vivo-h1 { font-size: 1.9em; padding-top: 0.3em; }
+.cm-vivo .cm-vivo-h2 { font-size: 1.45em; padding-top: 0.5em; }
+.cm-vivo .cm-vivo-h3 { font-size: 1.2em; padding-top: 0.4em; }
+.cm-vivo .cm-vivo-cita { padding-left: 14px; border-left: 3px solid var(--esp-border); color: var(--esp-text-muted); }
+.cm-vivo .cm-vivo-bloque { font-family: var(--esp-font-mono, ui-monospace, monospace); font-size: 0.92em; background: var(--esp-bg-sunken); }
+.cm-vivo .cm-vivo-codigo { font-family: var(--esp-font-mono, ui-monospace, monospace); font-size: 0.92em; padding: 1px 4px; border-radius: 4px; background: var(--esp-bg-sunken); }
+.cm-vivo .cm-vivo-enlace { color: var(--esp-accent); cursor: pointer; }
+.cm-vivo .cm-vivo-enlace span { text-decoration: none; }
+.cm-vivo .cm-vivo-hecha { color: var(--esp-text-muted); text-decoration: line-through; }
+.cm-vivo-vineta { display: inline-block; width: 1.1em; color: var(--esp-text-muted); }
+.cm-vivo-casilla { margin: 0 0.45em 0 0; vertical-align: -2px; accent-color: var(--esp-accent); cursor: pointer; }
+.cm-vivo-hr { display: inline-block; width: 100%; vertical-align: middle; border-top: 1px solid var(--esp-border); }
+.cm-vivo-imagen { max-width: 100%; vertical-align: top; }
+.cm-vivo-tabla { padding: 6px 0; cursor: text; overflow-x: auto; font-family: var(--esp-font); line-height: 1.5; }
+.cm-vivo-tabla table { border-collapse: collapse; }
+.cm-vivo-tabla th, .cm-vivo-tabla td { padding: 6px 10px; border: 1px solid var(--esp-border); }
+.wikilink { color: var(--esp-accent); cursor: pointer; text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--esp-accent) 40%, transparent); }
 .wikilink:hover { border-bottom-color: var(--esp-accent); }
 .wikilink.no-existe { color: var(--esp-text-muted); border-bottom-style: dashed; }
 
@@ -421,5 +423,5 @@ kbd {
   .app, .app.sin-lateral { grid-template-columns: minmax(0, 1fr); }
   .lateral { position: fixed; inset: 0 auto 0 0; width: min(85vw, var(--lateral-ancho)); z-index: 20; }
   .app.sin-lateral .lateral { display: none; }
-  .cm-content, .markdown { padding-left: 16px !important; padding-right: 16px !important; }
+  .cm-content { padding-left: 16px !important; padding-right: 16px !important; }
 }

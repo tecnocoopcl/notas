@@ -4,12 +4,12 @@ import { etagFuerte, hayConflicto } from '../notas/sincronia';
 import { avisar } from '../pod/solid';
 import { borrarBorrador, guardarBorrador, leerBorrador } from '../notas/borradores';
 import { Editor } from './Editor';
-import { Vista } from './Vista';
 import { Grafo } from './Grafo';
 import { Link, hrefNota } from '../ruta';
 import { nombreDe } from '../notas/wikilinks';
 
-// Una nota abierta: la lee del pod y la muestra en edición o lectura.
+// Una nota abierta: la lee del pod y la muestra en edición o lectura (vista
+// previa en vivo, que también se puede editar).
 //
 // Guardado en dos tiempos:
 //   1. Cada cambio queda al instante en este equipo (borradores.js).
@@ -41,7 +41,6 @@ export function NotaAbierta({ vault, ruta, indice, modo, onSeguirEnlace, onCrear
   // sincronizada | local | sincronizando | conflicto | error
   const [estado, setEstado] = useState('sincronizada');
   const [conflictoDeBorrador, setConflictoDeBorrador] = useState(false);
-  const [vistaTexto, setVistaTexto] = useState('');
   const texto = useRef('');
   const etag = useRef(null); // versión del pod sobre la que se está escribiendo
   const original = useRef(null); // …y su texto
@@ -103,7 +102,6 @@ export function NotaAbierta({ vault, ruta, indice, modo, onSeguirEnlace, onCrear
         } else if (borrador) {
           borrarBorrador(base, ruta);
         }
-        setVistaTexto(texto.current);
         // Puede haber cambiado desde que se indexó.
         actualizar(ruta, texto.current);
         setCarga({ estado: 'lista' });
@@ -179,7 +177,6 @@ export function NotaAbierta({ vault, ruta, indice, modo, onSeguirEnlace, onCrear
 
   function onChange(nuevo) {
     texto.current = nuevo;
-    setVistaTexto(nuevo);
     sucia.current = true;
     clearTimeout(tLocal.current);
     tLocal.current = setTimeout(guardarLocalYa, GUARDAR_LOCAL_TRAS);
@@ -252,7 +249,6 @@ export function NotaAbierta({ vault, ruta, indice, modo, onSeguirEnlace, onCrear
     texto.current = nota.texto;
     etag.current = nota.etag;
     original.current = nota.texto;
-    setVistaTexto(nota.texto);
     actualizar(ruta, nota.texto);
     setEstado('sincronizada');
     // Vuelve a montar el editor con el texto del pod.
@@ -299,18 +295,16 @@ export function NotaAbierta({ vault, ruta, indice, modo, onSeguirEnlace, onCrear
             </div>
           </div>
         )}
-        {modo === 'editar' ? (
-          <Editor
-            key={carga.version ?? 0}
-            texto={texto.current}
-            ruta={ruta}
-            rutas={indice.rutas}
-            onChange={onChange}
-            onSeguirEnlace={onSeguirEnlace}
-          />
-        ) : (
-          <Vista texto={vistaTexto} ruta={ruta} resolver={indice.resolver} onSeguirEnlace={onSeguirEnlace} />
-        )}
+        <Editor
+          key={carga.version ?? 0}
+          texto={texto.current}
+          ruta={ruta}
+          rutas={indice.rutas}
+          resolver={indice.resolver}
+          vivo={modo === 'leer'}
+          onChange={onChange}
+          onSeguirEnlace={onSeguirEnlace}
+        />
       </div>
       <aside className="nota-panel" aria-label="Enlaces de la nota">
         <section>

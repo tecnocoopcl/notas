@@ -9,7 +9,9 @@ misma build funciona suelta (con su propio login Solid) y alojada en
 
 - Navegar las carpetas y notas del vault; crear, renombrar y borrar.
 - Editar en Markdown (CodeMirror) con autoguardado local y sincronización diferida; alternar edición y
-  lectura con Ctrl/Cmd+E. Ctrl/Cmd+S guarda en el acto.
+  lectura con Ctrl/Cmd+E. La lectura es una vista previa en vivo: la nota se ve renderizada y se edita
+  ahí mismo (el Markdown aparece solo en la línea del cursor; las casillas se marcan con un clic).
+  Ctrl/Cmd+S guarda en el acto.
 - Enlazar notas con `[[Nota]]` (autocompleta al escribir `[[`). Ctrl/Cmd+clic
   sigue un enlace en el editor; en lectura basta un clic. Si la nota no
   existe, se crea junto a la que enlaza (o desde la raíz si el enlace lleva

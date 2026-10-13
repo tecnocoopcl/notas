@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { EditorView, basicSetup } from 'codemirror';
 import { keymap } from '@codemirror/view';
-import { EditorState, Prec } from '@codemirror/state';
+import { Compartment, EditorState, Prec } from '@codemirror/state';
 import { indentWithTab } from '@codemirror/commands';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { languages } from '@codemirror/language-data';
@@ -13,6 +13,7 @@ import {
   insertarEnlace,
   insertarWikilink,
 } from '../notas/formato';
+import { vistaEnVivo } from './vivo';
 
 // Editor Markdown (CodeMirror 6). No controlado: el texto inicial se carga al
 // montar (el padre lo vuelve a montar con `key` al cambiar de nota) y cada
@@ -20,6 +21,10 @@ import {
 //
 // Al escribir "[[" sugiere las notas del vault. Ctrl/Cmd+clic sobre un
 // [[enlace]] lo sigue.
+//
+// Con `vivo` (modo lectura) la nota se ve renderizada y se sigue pudiendo
+// editar (ver vivo.js); un clic en un enlace lo sigue. Cambiar de modo no
+// vuelve a montar el editor: se conservan el cursor y el historial.
 
 const tema = EditorView.theme({
   '&': { height: '100%', fontSize: '16px', backgroundColor: 'transparent', color: 'var(--esp-text)' },
@@ -50,11 +55,13 @@ function enlaceEn(view, pos) {
   return null;
 }
 
-export function Editor({ texto, ruta, rutas, onChange, onSeguirEnlace }) {
+export function Editor({ texto, ruta, rutas, resolver, vivo = false, onChange, onSeguirEnlace }) {
   const contenedor = useRef(null);
+  const vista = useRef(null);
+  const modoVivo = useRef(null);
   // Los callbacks y la lista de rutas cambian sin recrear el editor.
   const props = useRef({});
-  props.current = { ruta, rutas, onChange, onSeguirEnlace };
+  props.current = { ruta, rutas, resolver, onChange, onSeguirEnlace };
 
   useEffect(() => {
     function sugerirNotas(contexto) {
@@ -77,6 +84,7 @@ export function Editor({ texto, ruta, rutas, onChange, onSeguirEnlace }) {
       };
     }
 
+    modoVivo.current = new Compartment();
     const view = new EditorView({
       parent: contenedor.current,
       state: EditorState.create({
@@ -114,14 +122,22 @@ export function Editor({ texto, ruta, rutas, onChange, onSeguirEnlace }) {
             },
           }),
           tema,
+          modoVivo.current.of(vivo ? vistaEnVivo(() => props.current) : []),
         ],
       }),
     });
+    vista.current = view;
     view.focus();
     return () => view.destroy();
     // Solo al montar: el texto inicial no se vuelve a aplicar.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    vista.current?.dispatch({
+      effects: modoVivo.current.reconfigure(vivo ? vistaEnVivo(() => props.current) : []),
+    });
+  }, [vivo]);
 
   return <div className="editor" ref={contenedor} />;
 }
