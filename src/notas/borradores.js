@@ -3,9 +3,10 @@
 // la pestaña o se corta la red antes de sincronizar, el borrador sigue aquí y
 // se recupera al volver a abrir la nota.
 //
-// Cada borrador recuerda el ETag de la versión del pod sobre la que se
-// escribió: si al volver el pod tiene otra, alguien la cambió desde otro lado
-// y hay conflicto.
+// Cada borrador recuerda la versión del pod sobre la que se escribió: su ETag
+// y su texto (`original`). Si al volver el pod tiene otro texto, alguien la
+// cambió desde otro lado y hay conflicto. Se compara el texto y no solo el
+// ETag: el ETag cambia también sin que cambie la nota (ver sincronia.js).
 //
 // localStorage puede no existir o estar lleno (modo privado, cuota): en ese
 // caso la app sigue funcionando, solo que sin red de seguridad local.
@@ -14,7 +15,8 @@ const PREFIJO = 'notas:borrador:';
 
 const clave = (base, ruta) => `${PREFIJO}${base}${ruta}`;
 
-// { texto, etag, fecha } o null
+// { texto, etag, original, enviando, fecha } o null. `enviando` es el texto de
+// un guardado que estaba en vuelo; `original` falta en los borradores viejos.
 export function leerBorrador(base, ruta) {
   try {
     const crudo = localStorage.getItem(clave(base, ruta));
@@ -24,9 +26,9 @@ export function leerBorrador(base, ruta) {
   }
 }
 
-export function guardarBorrador(base, ruta, { texto, etag }) {
+export function guardarBorrador(base, ruta, { texto, etag, original = null, enviando = null }) {
   try {
-    localStorage.setItem(clave(base, ruta), JSON.stringify({ texto, etag, fecha: Date.now() }));
+    localStorage.setItem(clave(base, ruta), JSON.stringify({ texto, etag, original, enviando, fecha: Date.now() }));
     return true;
   } catch {
     return false;

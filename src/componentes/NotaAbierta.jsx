@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { ConflictoPod } from '../pod/vault';
+import { etagFuerte, hayConflicto } from '../notas/sincronia';
 import { avisar } from '../pod/solid';
 import { borrarBorrador, guardarBorrador, leerBorrador } from '../notas/borradores';
 import { Editor } from './Editor';
@@ -16,7 +17,8 @@ import { nombreDe } from '../notas/wikilinks';
 //      cambio, con escritura condicional (If-Match). También al salir de la
 //      nota, al ocultar la pestaña y con Ctrl/Cmd+S (guardarYa).
 // Si la sincronización falla por red, se reintenta sola; el borrador local
-// sigue a salvo mientras tanto. Al abrir una nota con un borrador sin
+// sigue a salvo mientras tanto. Un 412 no se muestra como conflicto sin antes
+// releer la nota: solo lo es si su texto cambió desde otro lado. Al abrir una nota con un borrador sin
 // sincronizar, se recupera.
 //
 // El padre la monta con key={ruta}. `control` expone guardarYa(),
@@ -42,6 +44,8 @@ export function NotaAbierta({ vault, ruta, indice, modo, onSeguirEnlace, onCrear
   const [vistaTexto, setVistaTexto] = useState('');
   const texto = useRef('');
   const etag = useRef(null); // versión del pod sobre la que se está escribiendo
+  const original = useRef(null); // …y su texto
+  const enviando = useRef(null); // texto de un guardado en vuelo, si lo hay
   const sucia = useRef(false); // hay cambios que el pod todavía no tiene
   const tSincronizar = useRef(null);
   const tLocal = useRef(null);
@@ -55,7 +59,13 @@ export function NotaAbierta({ vault, ruta, indice, modo, onSeguirEnlace, onCrear
   const guardarLocalYa = useCallback(() => {
     clearTimeout(tLocal.current);
     tLocal.current = null;
-    if (sucia.current && !descartada.current) guardarBorrador(base, ruta, { texto: texto.current, etag: etag.current });
+    if (sucia.current && !descartada.current)
+      guardarBorrador(base, ruta, {
+        texto: texto.current,
+        etag: etag.current,
+        original: original.current,
+        enviando: enviando.current,
+      });
   }, [base, ruta]);
 
   useEffect(() => {
@@ -68,11 +78,21 @@ export function NotaAbierta({ vault, ruta, indice, modo, onSeguirEnlace, onCrear
         const borrador = leerBorrador(base, ruta);
         etag.current = nota.etag;
         texto.current = nota.texto;
+        original.current = nota.texto;
         if (borrador && borrador.texto !== nota.texto) {
           // Quedaron cambios sin sincronizar de la vez anterior.
           texto.current = borrador.texto;
           sucia.current = true;
-          if (borrador.etag && borrador.etag !== nota.etag) {
+          // Si se cerró con un guardado en vuelo y ese guardado llegó, el pod
+          // tiene lo enviado: no es un cambio de otro lado. Los borradores
+          // viejos no guardan el texto original: ahí se cae al ETag, ya en
+          // forma fuerte (antes podía quedar guardado con W/).
+          const desde =
+            borrador.enviando === nota.texto
+              ? nota.texto
+              : (borrador.original ??
+                (!borrador.etag || etagFuerte(borrador.etag) === nota.etag ? nota.texto : null));
+          if (hayConflicto({ enPod: nota.texto, base: desde, mio: borrador.texto })) {
             // …y el pod cambió desde otro lado mientras tanto.
             setConflictoDeBorrador(true);
             setEstado('conflicto');
@@ -98,16 +118,33 @@ export function NotaAbierta({ vault, ruta, indice, modo, onSeguirEnlace, onCrear
     ({ forzar = false } = {}) => {
       clearTimeout(tSincronizar.current);
       tSincronizar.current = null;
+      // Escribe con If-Match. Si el pod la rechaza, se relee: si el texto no
+      // cambió desde otro lado (solo el ETag, o ya tiene lo mismo), se sigue
+      // con el ETag nuevo en vez de avisar un conflicto que no existe.
+      async function escribir(contenido, forzar) {
+        try {
+          return await vault.guardarNota(ruta, contenido, { etag: etag.current, forzar });
+        } catch (err) {
+          if (!(err instanceof ConflictoPod)) throw err;
+          const actual = await vault.leerNota(ruta);
+          if (!actual || hayConflicto({ enPod: actual.texto, base: original.current, mio: contenido })) throw err;
+          if (actual.texto === contenido) return actual.etag;
+          return vault.guardarNota(ruta, contenido, { etag: actual.etag });
+        }
+      }
+
       // Los guardados van en fila: el ETag de uno es la condición del siguiente.
       enCurso.current = enCurso.current.then(async () => {
         if (descartada.current || !sucia.current) return;
         if (estadoRef.current === 'conflicto' && !forzar) return;
-        guardarLocalYa();
         const contenido = texto.current;
+        enviando.current = contenido;
+        guardarLocalYa();
         const veniaConError = estadoRef.current === 'error';
         setEstado('sincronizando');
         try {
-          etag.current = await vault.guardarNota(ruta, contenido, { etag: etag.current, forzar });
+          etag.current = await escribir(contenido, forzar);
+          original.current = contenido;
           actualizar(ruta, contenido);
           setConflictoDeBorrador(false);
           if (texto.current === contenido) {
@@ -116,7 +153,8 @@ export function NotaAbierta({ vault, ruta, indice, modo, onSeguirEnlace, onCrear
             setEstado('sincronizada');
           } else {
             // Se siguió escribiendo mientras se sincronizaba.
-            guardarBorrador(base, ruta, { texto: texto.current, etag: etag.current });
+            enviando.current = null;
+            guardarLocalYa();
             setEstado('local');
             if (!tSincronizar.current) tSincronizar.current = setTimeout(() => guardarRef.current(), SINCRONIZAR_TRAS);
           }
@@ -128,6 +166,8 @@ export function NotaAbierta({ vault, ruta, indice, modo, onSeguirEnlace, onCrear
             if (!veniaConError) avisar(`No se pudo sincronizar «${nombreDe(ruta)}»: ${err.message}. Queda guardada en este equipo.`, 'error');
             tSincronizar.current = setTimeout(() => guardarRef.current(), REINTENTAR_TRAS);
           }
+        } finally {
+          enviando.current = null;
         }
       });
       return enCurso.current;
@@ -211,6 +251,7 @@ export function NotaAbierta({ vault, ruta, indice, modo, onSeguirEnlace, onCrear
     if (!nota) return setCarga({ estado: 'no-existe' });
     texto.current = nota.texto;
     etag.current = nota.etag;
+    original.current = nota.texto;
     setVistaTexto(nota.texto);
     actualizar(ruta, nota.texto);
     setEstado('sincronizada');

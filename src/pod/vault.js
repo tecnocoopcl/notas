@@ -1,5 +1,6 @@
 import { createContainerAt, getContainedResourceUrlAll, getSolidDataset } from '@inrupt/solid-client';
 import { podFetch } from './solid';
+import { etagFuerte } from '../notas/sincronia';
 
 // Operaciones sobre el vault: una carpeta del pod (Documentos/) con
 // subcarpetas y archivos .md. La app trabaja con **rutas** relativas al vault
@@ -74,7 +75,7 @@ export function crearVault(raiz) {
     const res = await fetchFresco(url(r), { headers: { Accept: 'text/markdown, text/plain, */*' } });
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`${r} respondió ${res.status}`);
-    return { texto: await res.text(), etag: res.headers.get('ETag') };
+    return { texto: await res.text(), etag: etagFuerte(res.headers.get('ETag')) };
   }
 
   // Escritura condicional: con el ETag de la última lectura (If-Match), o
@@ -82,7 +83,7 @@ export function crearVault(raiz) {
   // no se pisa en silencio. Las carpetas intermedias las crea el servidor.
   // Devuelve el ETag nuevo.
   async function guardarNota(r, texto, { etag = null, nueva = false, forzar = false } = {}) {
-    const condicion = forzar ? {} : nueva ? { 'If-None-Match': '*' } : etag ? { 'If-Match': etag } : {};
+    const condicion = forzar ? {} : nueva ? { 'If-None-Match': '*' } : etag ? { 'If-Match': etagFuerte(etag) } : {};
     const res = await podFetch(url(r), {
       method: 'PUT',
       headers: { 'Content-Type': 'text/markdown', ...condicion },
@@ -91,9 +92,9 @@ export function crearVault(raiz) {
     if (res.status === 412) throw nueva ? new YaExiste(r) : new ConflictoPod();
     if (!res.ok) throw new Error(`${r} respondió ${res.status}`);
     const nuevo = res.headers.get('ETag');
-    if (nuevo) return nuevo;
+    if (nuevo) return etagFuerte(nuevo);
     const head = await fetchFresco(url(r), { method: 'HEAD' });
-    return head.headers.get('ETag');
+    return etagFuerte(head.headers.get('ETag'));
   }
 
   async function crearNota(r, texto) {
