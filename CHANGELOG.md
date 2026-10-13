@@ -4,6 +4,27 @@ Todos los cambios relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y el proyecto usa [versionado semántico](https://semver.org/lang/es/).
 
+## [1.1.0] - 2026-10-13
+
+### Añadido
+
+- El modo lectura ahora se puede editar: es una vista previa en vivo sobre
+  el mismo editor. La nota se ve renderizada (títulos, énfasis, enlaces,
+  `[[wikilinks]]`, casillas, citas, tablas) y el Markdown aparece solo en la
+  línea del cursor. Las casillas se marcan con un clic, un clic en un enlace
+  lo sigue y un clic en una tabla la abre para editarla. Cambiar de modo
+  conserva el cursor y el historial de deshacer.
+
+### Corregido
+
+- Conflictos de sincronización falsos: Cloudflare debilita los ETags
+  (`W/"…"`) y el pod rechazaba el `If-Match` con 412 en cada guardado. Los
+  ETags se pasan a forma fuerte, y ante un 412 se relee la nota: solo se
+  avisa un conflicto si su texto cambió desde otro lado.
+- Conflicto falso al volver a una nota tras cerrar la pestaña mientras se
+  sincronizaba: el borrador local guarda el texto original y el guardado en
+  vuelo.
+
 ## [1.0.0] - 2026-10-08
 
 Primera versión: notas en Markdown enlazadas entre sí, al estilo de
