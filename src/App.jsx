@@ -3,7 +3,7 @@ import { avisar, confirmar, desconectar, resolverRaices } from './pod/solid';
 import { crearVault, guardarConfig, leerConfig, YaExiste } from './pod/vault';
 import { useIndice } from './notas/indice';
 import { carpetaDe, nombreDe, rutaParaNueva } from './notas/wikilinks';
-import { hrefNota, navegar, useRuta, Link } from './ruta';
+import { adelante, atras, hrefNota, navegar, useHistorial, useRuta, Link } from './ruta';
 import { Arbol } from './componentes/Arbol';
 import { NotaAbierta } from './componentes/NotaAbierta';
 import { Grafo } from './componentes/Grafo';
@@ -55,6 +55,7 @@ function Vault({ raices, sesion }) {
   const vault = useMemo(() => crearVault(raices.vault), [raices.vault]);
   const indice = useIndice(vault);
   const ruta = useRuta();
+  const historial = useHistorial();
   const actual = ruta.vista === 'nota' ? ruta.ruta : null;
 
   const [contenidos, setContenidos] = useState(() => new Map());
@@ -163,6 +164,9 @@ function Vault({ raices, sesion }) {
     // ⌘G es "buscar siguiente" en Chrome y no llega a la página: Alt+G.
     else if ((e.altKey && !mod && tecla === 'g') || (mod && !e.altKey && !e.shiftKey && tecla === 'g'))
       accion = () => (ruta.vista === 'grafo' ? cerrarGrafo() : navegar('/grafo'));
+    // Atrás/adelante como Obsidian: Mod+Alt+←/→ (⌘[ y Alt+← los usa el editor).
+    else if (mod && e.altKey && !e.shiftKey && e.key === 'ArrowLeft') accion = atras;
+    else if (mod && e.altKey && !e.shiftKey && e.key === 'ArrowRight') accion = adelante;
     else if (mod && (e.code === 'Backslash' || e.key === '\\')) accion = () => setLateral((v) => !v);
     else if (mod && (e.key === '/' || e.code === 'Slash' || e.key === '?' || (e.shiftKey && e.code === 'Digit7'))) accion = () => setPanel('atajos');
     else if (e.key === 'Escape' && !mod && ruta.vista === 'grafo') accion = cerrarGrafo;
@@ -352,6 +356,12 @@ function Vault({ raices, sesion }) {
         <header className="barra">
           <button type="button" className="icono-boton" aria-label={lateral ? 'Ocultar panel lateral' : 'Mostrar panel lateral'} onClick={() => setLateral((v) => !v)}>
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12v9H2z M6 3.5v9" fill="none" stroke="currentColor" strokeWidth="1.3" /></svg>
+          </button>
+          <button type="button" className="icono-boton" title={`Atrás (${MOD}+${MOD === '⌘' ? '⌥' : 'Alt'}+←)`} aria-label="Nota anterior" disabled={!historial.atras} onClick={atras}>
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3L5 8l5 5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </button>
+          <button type="button" className="icono-boton" title={`Adelante (${MOD}+${MOD === '⌘' ? '⌥' : 'Alt'}+→)`} aria-label="Nota siguiente" disabled={!historial.adelante} onClick={adelante}>
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </button>
           <h1 className="migas">
             {ruta.vista === 'nota' && (

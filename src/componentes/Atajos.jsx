@@ -14,6 +14,8 @@ export const ATAJOS = [
       [[ALT, 'N'], 'Nueva nota'],
       [[MOD, 'S'], 'Guardar ahora'],
       [[MOD, 'E'], 'Alternar Markdown y vista previa (editable)'],
+      [[MOD, ALT, '←'], 'Volver a la nota anterior'],
+      [[MOD, ALT, '→'], 'Ir a la nota siguiente'],
       [[ALT, 'G'], 'Abrir o cerrar el grafo'],
       [[MOD, '\\'], 'Mostrar u ocultar el panel lateral'],
       [['Esc'], 'Cerrar el grafo o un diálogo'],

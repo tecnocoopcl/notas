@@ -26,8 +26,33 @@ export const hrefNota = (ruta) => `/nota/${ruta.split('/').map(encodeURIComponen
 export function navegar(href, { reemplazar = false } = {}) {
   const url = new URL(href, window.location.origin);
   if (url.pathname === window.location.pathname) return;
-  window.history[reemplazar ? 'replaceState' : 'pushState'](null, '', url.pathname);
+  if (reemplazar) {
+    window.history.replaceState({ i: posicion() }, '', url.pathname);
+  } else {
+    const i = posicion() + 1;
+    maximo = i; // navegar a una nota nueva descarta lo que había "adelante"
+    window.history.pushState({ i }, '', url.pathname);
+  }
   window.dispatchEvent(new PopStateEvent('popstate'));
+}
+
+// Historial atrás/adelante, como en un navegador. Cada entrada guarda su
+// posición en history.state; `maximo` es la última que existe, así se sabe si
+// hay "adelante". Tras recargar la página solo se recuerda hasta donde se llegó.
+let maximo = window.history.state?.i ?? 0;
+const posicion = () => window.history.state?.i ?? 0;
+
+export const atras = () => window.history.back();
+export const adelante = () => window.history.forward();
+
+export function useHistorial() {
+  const [estado, setEstado] = useState(() => ({ atras: posicion() > 0, adelante: posicion() < maximo }));
+  useEffect(() => {
+    const actualizar = () => setEstado({ atras: posicion() > 0, adelante: posicion() < maximo });
+    window.addEventListener('popstate', actualizar);
+    return () => window.removeEventListener('popstate', actualizar);
+  }, []);
+  return estado;
 }
 
 export function useRuta() {
