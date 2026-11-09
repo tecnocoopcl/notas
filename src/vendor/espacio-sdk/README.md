@@ -1,7 +1,7 @@
 # @tecnocoop/espacio-sdk (vendorizado)
 
 Copia local de la SDK de [espacio](https://github.com/tecnocoopcl/espacio),
-`packages/sdk/src/` en ese repo, versión **0.1.0**.
+`packages/sdk/src/` en ese repo, versión **0.3.0**.
 
 ## Por qué está copiada y no como dependencia de npm
 

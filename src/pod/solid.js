@@ -51,6 +51,13 @@ export function avisar(message, tone = 'info') {
   window.dispatchEvent(new CustomEvent('notas:aviso', { detail: { message, tone } }));
 }
 
+// Lo que se hace en Notas, para «Lo que has hecho hoy» en el Inicio de espacio:
+// la app etiqueta el evento (`nota-nueva`, declarado en su manifiesto) y el
+// shell solo lo suma. Suelta, o con un shell anterior a la SDK 0.3.0, no hace nada.
+export function anotarActividad(tipo, n = 1) {
+  espacio()?.actividad?.({ tipo, n }).catch(() => {});
+}
+
 // window.confirm no funciona en el iframe de espacio (no tiene allow-modals):
 // devuelve null sin avisar, que es peor que un error.
 export async function confirmar(message, { title, confirmLabel = 'Borrar' } = {}) {

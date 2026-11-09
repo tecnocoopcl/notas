@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { avisar, confirmar, desconectar, resolverRaices } from './pod/solid';
+import { anotarActividad, avisar, confirmar, desconectar, resolverRaices } from './pod/solid';
 import { crearVault, guardarConfig, leerConfig, YaExiste } from './pod/vault';
 import { useIndice } from './notas/indice';
 import { carpetaDe, nombreDe, rutaParaNueva } from './notas/wikilinks';
@@ -194,6 +194,7 @@ function Vault({ raices, sesion }) {
     const titulo = nombreDe(rutaNota);
     const contenido = `# ${titulo}\n\n`;
     await vault.crearNota(rutaNota, contenido);
+    anotarActividad('nota-nueva');
     indice.actualizar(rutaNota, contenido);
     await refrescarHasta(rutaNota);
     navegar(hrefNota(rutaNota));

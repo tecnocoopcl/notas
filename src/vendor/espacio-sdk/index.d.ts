@@ -38,6 +38,17 @@ export interface Espacio {
     confirm(options: ConfirmOptions): Promise<boolean>
     notify(options: NotifyOptions): Promise<void>
   }
+  /**
+   * Avisa al socio (sin `para`) o a otros socios. Requiere `notify: true` en las
+   * capacidades del manifiesto; un shell anterior a la SDK 0.2.0 rechaza la llamada.
+   */
+  notificar(options: { para?: string | string[]; titulo: string; texto?: string; url?: string }): Promise<void>
+  /**
+   * Cuenta algo hecho en la app; `n` por defecto 1 (entero entre 1 y 1000). El
+   * `tipo` debe estar declarado en `capabilities.activity`. Los datos quedan en
+   * este equipo y alimentan lo que Inicio muestra del día.
+   */
+  actividad(options: { tipo: string; n?: number }): Promise<void>
   on(event: 'session-changed' | 'theme-changed', callback: (value: unknown) => void): () => void
 }
 

@@ -6,7 +6,7 @@
  * que el shell que las aloja.
  */
 
-export const SDK_VERSION = '0.1.0'
+export const SDK_VERSION = '0.3.0'
 
 /** Orígenes desde los que un shell legítimo puede abrir el canal. */
 export const SHELL_ORIGINS = Object.freeze([
@@ -33,6 +33,10 @@ export const METHOD = Object.freeze({
   FETCH: 'fetch',
   UI_CONFIRM: 'ui.confirm',
   UI_NOTIFY: 'ui.notify',
+  /** Avisar al socio o a otro socio (capacidad `notify`; ADR-029). Desde SDK 0.2.0. */
+  NOTIFICAR: 'notificar',
+  /** Contar algo hecho en la app (capacidad `activity`; ADR-030). Desde SDK 0.3.0. */
+  ACTIVIDAD: 'actividad',
 })
 
 /** Respuestas grandes no viajan por el canal; ver files.read (pendiente). */

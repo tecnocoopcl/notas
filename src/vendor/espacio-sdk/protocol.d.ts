@@ -13,6 +13,8 @@ export declare const METHOD: {
   readonly FETCH: 'fetch'
   readonly UI_CONFIRM: 'ui.confirm'
   readonly UI_NOTIFY: 'ui.notify'
+  readonly NOTIFICAR: 'notificar'
+  readonly ACTIVIDAD: 'actividad'
 }
 export declare const MAX_RESPONSE_BYTES: number
 export declare const TIMEOUT_MS: number

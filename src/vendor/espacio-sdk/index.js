@@ -179,6 +179,18 @@ export function buildApi(port, hello) {
       confirm: (options) => call(METHOD.UI_CONFIRM, options),
       notify: (options) => call(METHOD.UI_NOTIFY, options),
     },
+    /**
+     * Avisa al socio (sin `para`) o a otros socios (`para`: usuarios o WebIDs).
+     * Pide la capacidad `notify` en el manifiesto. Un shell anterior a la SDK
+     * 0.2.0 responde «método desconocido»: la app debe tolerarlo.
+     */
+    notificar: (options) => call(METHOD.NOTIFICAR, options),
+    /**
+     * Cuenta algo hecho en la app (`espacio.actividad({ tipo: 'tareas-completadas' })`).
+     * El tipo tiene que estar declarado en `capabilities.activity` del manifiesto.
+     * Un shell anterior a la SDK 0.3.0 responde «método desconocido»: tolerarlo.
+     */
+    actividad: (options) => call(METHOD.ACTIVIDAD, options),
     on(event, callback) {
       const set = listeners.get(event) ?? new Set()
       set.add(callback)
