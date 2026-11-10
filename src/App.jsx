@@ -14,6 +14,8 @@ import { borrarBorrador, borrarBorradoresBajo } from './notas/borradores';
 import { Buscador } from './componentes/Buscador';
 import { Atajos, MOD } from './componentes/Atajos';
 
+const RECIENTES = 20; // notas recordadas para el buscador (Cmd/Ctrl+O)
+
 export default function App({ sesion }) {
   const [conectando, setConectando] = useState(false);
   const [raices, setRaices] = useState(null);
@@ -92,7 +94,8 @@ function Vault({ raices, sesion }) {
 
   useEffect(() => {
     if (!config) return;
-    const siguiente = { ...config, ultima: actual ?? config.ultima ?? null, expandidas: [...expandidas] };
+    const recientes = actual ? [actual, ...(config.recientes ?? []).filter((r) => r !== actual)].slice(0, RECIENTES) : (config.recientes ?? []);
+    const siguiente = { ...config, ultima: actual ?? config.ultima ?? null, recientes, expandidas: [...expandidas] };
     if (JSON.stringify(siguiente) === JSON.stringify(config)) return;
     const t = setTimeout(() => {
       setConfig(siguiente);
@@ -424,6 +427,7 @@ function Vault({ raices, sesion }) {
       {panel === 'buscador' && (
         <Buscador
           rutas={indice.rutas}
+          recientes={config?.recientes ?? []}
           onAbrir={(r) => navegar(hrefNota(r))}
           onCrear={(nombre) => seguirEnlace(nombre)}
           onClose={() => setPanel(null)}

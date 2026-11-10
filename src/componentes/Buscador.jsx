@@ -4,17 +4,20 @@ import { carpetaDe, nombreDe } from '../notas/wikilinks';
 
 // Abrir nota por nombre (Ctrl/Cmd+O). Busca por nombre y carpeta, sin
 // distinguir mayúsculas ni tildes. Si no hay ninguna con ese nombre, la última
-// opción la crea.
+// opción la crea. Sin escribir nada, salen primero las notas abiertas hace
+// poco (la más reciente arriba) y después el resto por orden alfabético.
 
 const normal = (s) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 const MAXIMO = 50;
 
-export function Buscador({ rutas, onAbrir, onCrear, onClose }) {
+export function Buscador({ rutas, recientes = [], onAbrir, onCrear, onClose }) {
   const [consulta, setConsulta] = useState('');
   const [activo, setActivo] = useState(0);
 
   const opciones = useMemo(() => {
     const q = normal(consulta.trim());
+    const posicion = new Map(recientes.map((r, i) => [r, i]));
+    const reciente = (ruta) => posicion.get(ruta) ?? Infinity;
     const halladas = rutas
       .map((ruta) => {
         const nombre = normal(nombreDe(ruta));
@@ -23,13 +26,13 @@ export function Buscador({ rutas, onAbrir, onCrear, onClose }) {
         return { ruta, puntaje };
       })
       .filter((o) => o.puntaje >= 0)
-      .sort((a, b) => a.puntaje - b.puntaje || a.ruta.localeCompare(b.ruta, 'es'))
+      .sort((a, b) => a.puntaje - b.puntaje || reciente(a.ruta) - reciente(b.ruta) || a.ruta.localeCompare(b.ruta, 'es'))
       .slice(0, MAXIMO)
       .map((o) => ({ tipo: 'abrir', ruta: o.ruta }));
     const exacta = halladas.some((o) => normal(nombreDe(o.ruta)) === q);
     if (q && !exacta && !/[\\]/.test(consulta)) halladas.push({ tipo: 'crear', nombre: consulta.trim() });
     return halladas;
-  }, [rutas, consulta]);
+  }, [rutas, recientes, consulta]);
 
   const indice = Math.min(activo, Math.max(opciones.length - 1, 0));
 
