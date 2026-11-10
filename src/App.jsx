@@ -61,7 +61,7 @@ function Vault({ raices, sesion }) {
   const [contenidos, setContenidos] = useState(() => new Map());
   const [expandidas, setExpandidas] = useState(() => new Set());
   const [config, setConfig] = useState(null);
-  const [modo, setModo] = useState('editar');
+  const [modo, setModo] = useState('leer');
   const [dialogo, setDialogo] = useState(null);
   const [panel, setPanel] = useState(null); // 'buscador' | 'atajos'
   // En pantallas angostas el lateral se superpone: parte cerrado y se cierra
