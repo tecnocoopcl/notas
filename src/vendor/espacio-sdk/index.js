@@ -6,6 +6,8 @@ import {
   SDK_VERSION,
   SHELL_ORIGINS,
   TIMEOUT_MS,
+  EVENT,
+  THEME_VARIABLES,
 } from './protocol.js'
 
 export { SDK_VERSION }
@@ -66,6 +68,29 @@ export function connect({ timeout = 5000 } = {}) {
 }
 
 /**
+ * Aplica al documento el tema que manda el shell (ADR-034): las variables
+ * `--esp-*` de `tema.css`, `color-scheme` y `data-esp-tema` / `data-esp-contraste`
+ * en <html>, los mismos atributos que usa el shell. Una app que usa la paleta de
+ * espacio queda igual que el shell sin escribir nada; una que no, no se entera.
+ */
+export function applyTheme(value, root = globalThis.document?.documentElement) {
+  if (!root || !value || typeof value !== 'object') return
+  const variables = value.variables && typeof value.variables === 'object' ? value.variables : {}
+  for (const name of THEME_VARIABLES) {
+    const v = variables[name]
+    // Solo colores y similares: nada que pueda cerrar la declaración o cargar algo.
+    if (typeof v === 'string' && v.length <= 64 && /^[#\w\s().,%/-]+$/.test(v) && !/url\(/i.test(v)) {
+      root.style.setProperty(name, v.trim())
+    }
+  }
+  if (value.tema === 'claro' || value.tema === 'oscuro') {
+    root.dataset.espTema = value.tema
+    root.style.colorScheme = value.tema === 'claro' ? 'light' : 'dark'
+  }
+  if (typeof value.contraste === 'boolean') root.dataset.espContraste = String(value.contraste)
+}
+
+/**
  * Construye el objeto `Espacio` sobre un `MessagePort` ya abierto.
  *
  * Exportada (además de usarse internamente desde `connect()`) para poder
@@ -77,9 +102,16 @@ export function buildApi(port, hello) {
   const pending = new Map()
   const listeners = new Map()
 
+  /** El último tema recibido: quien se suscribe tarde lo recibe igual. */
+  let theme
+
   port.addEventListener('message', (event) => {
     const frame = event.data
     if (frame?.t === FRAME.EVENT) {
+      if (frame.n === EVENT.THEME_CHANGED) {
+        theme = frame.v
+        applyTheme(frame.v)
+      }
       for (const fn of listeners.get(frame.n) ?? []) fn(frame.v)
       return
     }
@@ -195,6 +227,7 @@ export function buildApi(port, hello) {
       const set = listeners.get(event) ?? new Set()
       set.add(callback)
       listeners.set(event, set)
+      if (event === EVENT.THEME_CHANGED && theme !== undefined) callback(theme)
       return () => set.delete(callback)
     },
   }

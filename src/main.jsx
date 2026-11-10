@@ -13,13 +13,7 @@ window.__espacio = await connect().catch(() => null);
 // La sesión se lee una vez al montar; si el socio entra o sale en espacio,
 // se recarga para no seguir guardando en el pod de otra sesión.
 window.__espacio?.on('session-changed', () => window.location.reload());
-// El shell manda sus variables de tema (--esp-*); se aplican tal cual.
-window.__espacio?.on('theme-changed', (tema) => {
-  if (!tema || typeof tema !== 'object') return;
-  for (const [nombre, valor] of Object.entries(tema)) {
-    if (nombre.startsWith('--')) document.documentElement.style.setProperty(nombre, String(valor));
-  }
-});
+// El tema que eligió el socio en espacio lo aplica la SDK sola (theme-changed).
 
 // La sesión Solid se resuelve antes de montar: al volver del proveedor de
 // identidad la URL trae el código de login, y hay que procesarlo una sola vez.

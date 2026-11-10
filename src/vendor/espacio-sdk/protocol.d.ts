@@ -16,5 +16,10 @@ export declare const METHOD: {
   readonly NOTIFICAR: 'notificar'
   readonly ACTIVIDAD: 'actividad'
 }
+export declare const EVENT: {
+  readonly SESSION_CHANGED: 'session-changed'
+  readonly THEME_CHANGED: 'theme-changed'
+}
+export declare const THEME_VARIABLES: readonly string[]
 export declare const MAX_RESPONSE_BYTES: number
 export declare const TIMEOUT_MS: number

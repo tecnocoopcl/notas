@@ -1,0 +1,155 @@
+/*
+ * Tema de espacio: la paleta y las medidas que comparten el shell, sus vistas
+ * locales y las mini-apps (ADR-034 — lenguaje visual).
+ *
+ * Es la única fuente: el shell la importa (apps/shell/src/tokens.css) y las
+ * mini-apps la copian con el resto de la SDK (src/vendor/espacio-sdk/). Fuera
+ * de espacio, la app sigue al sistema con esta misma paleta; dentro, el shell
+ * manda la que eligió el socio por `theme-changed` y la SDK la aplica sola.
+ *
+ * Contraste (WCAG AA, ver docs/auditoria-accesibilidad.md): el texto pide
+ * 4,5:1 y el borde que delimita un control, 3:1. `--esp-border` es solo para
+ * separar zonas; los campos y selects usan `--esp-border-control`.
+ */
+
+/* ── Paleta: oscuro por defecto (la de Inicio: negro azulado, índigo y rosa) ── */
+:root {
+  color-scheme: dark;
+  --esp-bg: #12131a;
+  --esp-bg-elevated: #1b1d27;
+  --esp-bg-sunken: #0d0e13;
+  --esp-border: #2a2d3a;
+  --esp-border-control: #6b7084;
+  --esp-text: #e8e9ef;
+  --esp-text-muted: #9a9db0;
+  --esp-accent: #6f7bf7;
+  --esp-accent-text: #0d0e13;
+  --esp-danger: #f76f7b;
+  --esp-danger-text: #0d0e13;
+  --esp-ok: #4fbf8b;
+  --esp-warn: #e8b65a;
+}
+
+/* Claro, mientras el socio no elija otra cosa: el del sistema. */
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --esp-bg: #f6f7fb;
+    --esp-bg-elevated: #ffffff;
+    --esp-bg-sunken: #eceef5;
+    --esp-border: #d9dce8;
+    --esp-border-control: #7d8295;
+    --esp-text: #1a1c24;
+    --esp-text-muted: #636779;
+    --esp-accent: #4351e8;
+    --esp-accent-text: #ffffff;
+    --esp-danger: #c62f3c;
+    --esp-danger-text: #ffffff;
+    --esp-ok: #1f8a5a;
+    --esp-warn: #8a5a00;
+  }
+}
+
+/* La elección explícita (Configuración › General), sobre lo que diga el sistema. */
+:root[data-esp-tema="claro"] {
+  color-scheme: light;
+    --esp-bg: #f6f7fb;
+  --esp-bg-elevated: #ffffff;
+  --esp-bg-sunken: #eceef5;
+  --esp-border: #d9dce8;
+  --esp-border-control: #7d8295;
+  --esp-text: #1a1c24;
+  --esp-text-muted: #636779;
+  --esp-accent: #4351e8;
+  --esp-accent-text: #ffffff;
+  --esp-danger: #c62f3c;
+  --esp-danger-text: #ffffff;
+  --esp-ok: #1f8a5a;
+  --esp-warn: #8a5a00;
+}
+:root[data-esp-tema="oscuro"] {
+  color-scheme: dark;
+  --esp-bg: #12131a;
+  --esp-bg-elevated: #1b1d27;
+  --esp-bg-sunken: #0d0e13;
+  --esp-border: #2a2d3a;
+  --esp-border-control: #6b7084;
+  --esp-text: #e8e9ef;
+  --esp-text-muted: #9a9db0;
+  --esp-accent: #6f7bf7;
+  --esp-accent-text: #0d0e13;
+  --esp-danger: #f76f7b;
+  --esp-danger-text: #0d0e13;
+  --esp-ok: #4fbf8b;
+  --esp-warn: #e8b65a;
+}
+:root[data-esp-contraste="true"][data-esp-tema="claro"] {
+  --esp-bg: #fff; --esp-bg-elevated: #fff; --esp-bg-sunken: #eee;
+  --esp-text: #000; --esp-text-muted: #222; --esp-border: #555; --esp-border-control: #000;
+  --esp-accent: #2330b8; --esp-accent-text: #fff; --esp-danger: #9c1020; --esp-ok: #0b5e3b; --esp-warn: #5c3c00;
+}
+:root[data-esp-contraste="true"][data-esp-tema="oscuro"] {
+  --esp-bg: #000; --esp-bg-elevated: #000; --esp-bg-sunken: #222;
+  --esp-text: #fff; --esp-text-muted: #eee; --esp-border: #aaa; --esp-border-control: #fff;
+  --esp-accent: #b4baff; --esp-accent-text: #000; --esp-danger: #ffb0b6; --esp-ok: #9df0c4; --esp-warn: #ffd27a;
+}
+
+/* ── Medidas y estados: iguales en claro y oscuro ── */
+:root {
+  --esp-font: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --esp-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
+  /*
+   * Radios: 6 para filas y botones de icono, 8 para botones y campos, 14 para
+   * paneles y diálogos, 999 para píldoras. `--esp-radius` (10) queda para
+   * tarjetas y avisos.
+   */
+  --esp-radius-sm: 6px;
+  --esp-radius-control: 8px;
+  --esp-radius: 10px;
+  --esp-radius-lg: 14px;
+
+  /*
+   * Estados sobre cualquier fondo: se mezclan con el texto o el acento en vez
+   * de elegir otro gris, así funcionan igual sobre el lateral, el contenido o
+   * un panel translúcido de Inicio.
+   */
+  --esp-hover: color-mix(in srgb, var(--esp-text) 6%, transparent);
+  --esp-hover-strong: color-mix(in srgb, var(--esp-text) 11%, transparent);
+  --esp-selected: color-mix(in srgb, var(--esp-accent) 20%, transparent);
+  --esp-focus-ring: 0 0 0 3px color-mix(in srgb, var(--esp-accent) 22%, transparent);
+
+  /*
+   * La estructura de una app: lateral a la izquierda, barra de 46 px arriba
+   * del contenido, controles de 30 px de alto.
+   */
+  --esp-bar-height: 46px;
+  --esp-sidebar-width: 240px;
+  --esp-control-height: 30px;
+
+  /*
+   * Elevaciones (ADR-026): qué tan arriba está una superficie. Cada nivel es
+   * una sombra y una capa; se usan estos nombres, no números sueltos.
+   *
+   *   nivel      sombra        capa
+   *   0 base                                  el contenido de cada app
+   *   1 elevado  --esp-elev-1  --esp-z-fijo   tarjetas, cabeceras fijas
+   *   2 flotante --esp-elev-2  --esp-z-flotante  popovers de una app
+   *   3 diálogo  --esp-elev-3  --esp-z-dialogo   modales de una app
+   *   4 barra    --esp-elev-3  --esp-z-barra  la barra de arriba del shell
+   *   5 menú     --esp-elev-3  --esp-z-menu   desplegables y clic derecho
+   *   6 buscador --esp-elev-4  --esp-z-buscador  el ⌘P del shell
+   *   7 aviso    --esp-elev-3  --esp-z-aviso  avisos que no interrumpen
+   */
+  --esp-elev-1: 0 1px 3px rgb(0 0 0 / 0.15);
+  --esp-elev-2: 0 6px 18px rgb(0 0 0 / 0.2);
+  --esp-elev-3: 0 10px 30px rgb(0 0 0 / 0.3);
+  --esp-elev-4: 0 24px 60px rgb(0 0 0 / 0.4);
+  --esp-z-fijo: 10;
+  --esp-z-flotante: 20;
+  --esp-z-dialogo: 50;
+  --esp-z-barra: 60;
+  --esp-z-menu: 70;
+  --esp-z-buscador: 80;
+  --esp-z-aviso: 90;
+}

@@ -130,14 +130,18 @@ export function Grafo({ rutas, aristas, actual, onAbrir, local = false }) {
 
     const medir = new ResizeObserver(() => g.width(el.clientWidth).height(el.clientHeight));
     medir.observe(el);
+    // Cambia el tema del sistema o el que manda espacio (la SDK lo escribe en <html>).
     const tema = window.matchMedia('(prefers-color-scheme: light)');
     const cambiarTema = () => {
       c = colores();
     };
     tema.addEventListener('change', cambiarTema);
+    const temaEspacio = new MutationObserver(cambiarTema);
+    temaEspacio.observe(document.documentElement, { attributes: true, attributeFilter: ['style', 'data-esp-tema', 'data-esp-contraste'] });
     return () => {
       medir.disconnect();
       tema.removeEventListener('change', cambiarTema);
+      temaEspacio.disconnect();
       g._destructor?.();
     };
   }, []);

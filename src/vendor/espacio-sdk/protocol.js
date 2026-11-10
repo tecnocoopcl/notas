@@ -6,7 +6,7 @@
  * que el shell que las aloja.
  */
 
-export const SDK_VERSION = '0.3.0'
+export const SDK_VERSION = '0.4.0'
 
 /** Orígenes desde los que un shell legítimo puede abrir el canal. */
 export const SHELL_ORIGINS = Object.freeze([
@@ -38,6 +38,38 @@ export const METHOD = Object.freeze({
   /** Contar algo hecho en la app (capacidad `activity`; ADR-030). Desde SDK 0.3.0. */
   ACTIVIDAD: 'actividad',
 })
+
+/** Eventos que el shell manda a la app (`espacio.on`). */
+export const EVENT = Object.freeze({
+  SESSION_CHANGED: 'session-changed',
+  /**
+   * El tema del socio (ADR-034): `{ tema: 'claro' | 'oscuro', contraste, variables }`,
+   * con `variables` el valor de cada una de THEME_VARIABLES. Llega al conectar
+   * y cada vez que cambia. Desde SDK 0.4.0 la SDK lo aplica sola al documento.
+   */
+  THEME_CHANGED: 'theme-changed',
+})
+
+/**
+ * Las variables de color de `tema.css` que el shell manda en `theme-changed`.
+ * Las demás (radios, estados, elevaciones) no dependen del tema o se derivan
+ * de estas, así que basta con la copia de `tema.css` que lleva cada app.
+ */
+export const THEME_VARIABLES = Object.freeze([
+  '--esp-bg',
+  '--esp-bg-elevated',
+  '--esp-bg-sunken',
+  '--esp-border',
+  '--esp-border-control',
+  '--esp-text',
+  '--esp-text-muted',
+  '--esp-accent',
+  '--esp-accent-text',
+  '--esp-danger',
+  '--esp-danger-text',
+  '--esp-ok',
+  '--esp-warn',
+])
 
 /** Respuestas grandes no viajan por el canal; ver files.read (pendiente). */
 export const MAX_RESPONSE_BYTES = 8 * 1024 * 1024

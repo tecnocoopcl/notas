@@ -4,6 +4,17 @@ Todos los cambios relevantes de este proyecto se documentan aquí.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/)
 y el proyecto usa [versionado semántico](https://semver.org/lang/es/).
 
+## [Unreleased]
+
+### Cambiado
+
+- La paleta es la de espacio (ADR-034 de espacio): `tema.css` viene con la
+  SDK 0.4.0 y reemplaza la copia de la paleta que tenía la app. Dentro de espacio se
+  aplica el tema que eligió el socio (claro, oscuro, alto contraste), no el del
+  sistema; el grafo se repinta al cambiarlo.
+- Botones, campos, barra, modo Lectura/Edición y modales con las medidas
+  comunes de espacio.
+
 ## [1.1.0] - 2026-10-13
 
 ### Añadido

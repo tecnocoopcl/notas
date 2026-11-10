@@ -1,7 +1,7 @@
 # @tecnocoop/espacio-sdk (vendorizado)
 
 Copia local de la SDK de [espacio](https://github.com/tecnocoopcl/espacio),
-`packages/sdk/src/` en ese repo, versión **0.3.0**.
+`packages/sdk/src/` en ese repo, versión **0.4.0**.
 
 ## Por qué está copiada y no como dependencia de npm
 
@@ -18,7 +18,7 @@ a ser una dependencia normal en `package.json` y este directorio se borra.
 No se edita a mano. Se copia de nuevo desde el repo de espacio:
 
 ```bash
-cp ../espacio/packages/sdk/src/{index,protocol}.{js,d.ts} src/vendor/espacio-sdk/
+cp ../espacio/packages/sdk/src/{index,protocol}.{js,d.ts} ../espacio/packages/sdk/src/tema.css src/vendor/espacio-sdk/
 ```
 
 y se revisa el diff — un cambio de protocolo aquí implica que el shell y esta
