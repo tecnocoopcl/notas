@@ -83,7 +83,7 @@ npm run build
 El puerto es 5180 porque el 5173 lo usa el shell de espacio en desarrollo.
 
 **Suelta:** abre `http://localhost:5180` y conecta con tu WebID o proveedor
-(por defecto `https://pods-rpi-tc.aebn.cl`).
+(por defecto `https://pods.tecnocooperativa.cl`).
 
 **Dentro de espacio:** el manifiesto está en
 `espacio/packages/catalog/apps/notas.json` (contenedor `Documentos/`, más

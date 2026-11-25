@@ -9,7 +9,7 @@ import { getPodUrlAll, getSolidDataset, getThing, getUrlAll } from '@inrupt/soli
 
 // Dos formas de tener sesión, como música y por-hacer:
 //
-// - **Suelta** (notas.aebn.cl): sesión Solid propia con
+// - **Suelta** (notas.tecnocooperativa.cl): sesión Solid propia con
 //   solid-client-authn-browser.
 // - **Dentro de espacio**: el escritorio ya tiene la sesión del socio y presta
 //   un fetch acotado a lo que declara el manifiesto: <pod>/Documentos/ (las
@@ -17,7 +17,7 @@ import { getPodUrlAll, getSolidDataset, getThing, getUrlAll } from '@inrupt/soli
 //   conexión en window.__espacio. No hay login propio: el redirect al
 //   proveedor ni siquiera podría cargarse en el iframe.
 
-export const PROVEEDOR_POR_DEFECTO = 'https://pods-rpi-tc.aebn.cl';
+export const PROVEEDOR_POR_DEFECTO = 'https://pods.tecnocooperativa.cl';
 
 const SOLID_OIDC_ISSUER = 'http://www.w3.org/ns/solid/terms#oidcIssuer';
 const VOLVER_KEY = 'notas-volver-a';
